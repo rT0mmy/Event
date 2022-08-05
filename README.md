@@ -22,6 +22,8 @@
 > **Warning** <br>
 > Event is still under development, major changes might occur.
 
+<br><br>
+
 > **Note** <br>
 > Event is a scriptevent, meaning that client - server and vice versa communication is not possible.
 
