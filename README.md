@@ -51,7 +51,7 @@ Event(EventName: {}) -> EventObject
 Event "EventName"
 ```
 
-> Creates a new EventObject
+> Creates a new ```EventObject```
 
 <br><br>
 
@@ -64,7 +64,7 @@ EventObject:Connect(function(...)
 end)
 ```
 
-> Creates a new ConnectionObject stored in EventObject.Connections, rendering it connected to the Event.
+> Creates a new ```ConnectionObject``` stored in ```EventObject.Connections```, rendering it connected to the Event.
 
 <br><br>
 
@@ -75,7 +75,7 @@ ConnectionObject:Disconnect() -> nil
 ConnectionObject:Disconnect()
 ```
 
-> Disconnects ConnectionObject from Event, thus removing it from EventObject.Connections too
+> Disconnects ```ConnectionObject``` from Event, thus removing it from ```EventObject.Connections``` too
 
 <br><br>
 
@@ -86,7 +86,7 @@ ConnectionObject:Trigger(...) -> nil
 ConnectionObject:Trigger("Hello World!", "Luau is great!")
 ```
 
-> Triggers the ConnectionObject - calling the connected callback function.
+> Triggers the ```ConnectionObject``` - calling the connected callback function.
 
 <br><br>
 
@@ -97,7 +97,7 @@ EventObject:Fire(...) -> nil
 EventObject:Fire("Hello World!", "\n Luau is great!")
 ```
 
-> Fires the event, triggering all ConnectionObjects in EventObject.Connections and their corresponding callback functions.
+> Fires the event, triggering all ```ConnectionObject```s in ```EventObject.Connections``` and their corresponding callback functions.
 
 <br><br>
 
@@ -108,7 +108,7 @@ EventObject:TerminateConnections() -> nil
 EventObject:TerminateConnections()
 ```
 
-> Terminates all Connections from EventObject.Connections
+> Terminates all Connections from ```EventObject.Connections```
 
 <br><br>
 
