@@ -1,7 +1,7 @@
 --[[
 Fast and lightweight custom Luau scriptevent implementation
 
-Made by TommyLuau (TommyRBLX)
+Made by Tommy (TommyRBLX, thenitropl)
 --]]
 
 --!strict
