@@ -112,6 +112,17 @@ EventObject:TerminateConnections()
 
 <br><br>
 
+<br><br>
+
+```lua
+EventObject:Destroy() -> nil
+```
+```lua
+EventObject:Destroy()
+```
+
+> Destroys ```EventObject```, thus also destroying all ```EventConnection```s in ```EventObject.Connections```
+
 ## Demo
 
 
