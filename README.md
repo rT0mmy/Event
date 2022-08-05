@@ -42,13 +42,92 @@ Straightforward and beginner friendly syntax that is suitable for everyone.
 local Event = require(...)
 ```
 
-> Coming soon...
+<br><br>
+
+```lua
+Event(EventName: {}) -> EventObject
+```
+```lua
+Event "EventName"
+```
+
+> Creates a new EventObject
+
+<br><br>
+
+```lua
+EventObject:Connect(Callback: ()) -> ConnectionObject
+```
+```lua
+EventObject:Connect(function(...)
+	print(...)
+end)
+```
+
+> Creates a new ConnectionObject stored in EventObject.Connections, rendering it connected to the Event.
+
+<br><br>
+
+```lua
+ConnectionObject:Disconnect() -> nil
+```
+```lua
+ConnectionObject:Disconnect()
+```
+
+> Disconnects ConnectionObject from Event, thus removing it from EventObject.Connections too
+
+<br><br>
+
+```lua
+ConnectionObject:Trigger(...) -> nil
+```
+```lua
+ConnectionObject:Trigger("Hello World!", "Luau is great!")
+```
+
+> Triggers the ConnectionObject - calling the connected callback function.
+
+<br><br>
+
+```lua
+EventObject:Fire(...) -> nil
+```
+```lua
+EventObject:Fire("Hello World!", "\n Luau is great!")
+```
+
+> Fires the event, calling all ConnectionObjects in EventObject.Connections and their corresponding callback functions.
+
+<br><br>
+
+```lua
+EventObject:TerminateConnections() -> nil
+```
+```lua
+EventObject:TerminateConnections()
+```
+
+> Terminates all Connections from EventObject.Connections
 
 <br><br>
 
 ## Demo
 
 
-> Coming soon...
+```lua
+local Event = require(...)
+
+local newEvent = Event "newEvent"
+local newEventConnection = newEvent:Connect(function(...)
+    print(...)
+end)
+
+newEvent:Fire("Hello", "World") -- // -> Hello World
+
+newEventConnection:Disconnect()
+newEvent:Fire("Hello", "World 2") -- // Doesn't print "Hell World 2", because the ConnectionObject "newEventConnection" was disconnected beforehand.
+
+```
 
 
