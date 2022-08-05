@@ -92,7 +92,7 @@ function Events:Fire(...:any)
     for _,v in self.Connections do v:Trigger(...) end
 end
 
-function Events:TerminateConnections(f:()->any)
+function Events:TerminateConnections()
     for _,v in self.Connections do v:Disconnect()end
     self.Connections = {}
 end
