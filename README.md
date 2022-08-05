@@ -31,9 +31,8 @@
 
 ## Why Event?
 
-Event allows easy and blazing fast setup of custom scriptevents, does not require any external dependencies. Event has a very simple and beginner friendly syntax that is suitable for everyone. 
-
-Event also features timed events, a type of event that occurs only after a specified amount of time has passed.
+Event allows easy and blazing fast setup of custom scriptevents, does not require any external dependencies. 
+Straightforward and beginner friendly syntax that is suitable for everyone. 
 
 <br><br><br><br>
 
