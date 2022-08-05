@@ -30,9 +30,7 @@ Event allows easy and blazing fast setup of custom scriptevents, does not requir
 
 Event also features timed events, a type of event that occurs only after a specified amount of time has passed.
 
----
-
-<br><br>
+<br><br><br><br>
 
 ## API
 
