@@ -25,7 +25,7 @@
 <br><br>
 
 > **Note** <br>
-> Event is a scriptevent, meaning that client - server and vice versa communication is not possible.
+> Event is a instance of scriptevent, meaning that client - server and vice versa communication is not possible.
 
 <br><br><br><br>
 
