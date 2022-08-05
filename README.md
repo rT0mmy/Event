@@ -97,7 +97,7 @@ EventObject:Fire(...) -> nil
 EventObject:Fire("Hello World!", "\n Luau is great!")
 ```
 
-> Fires the event, calling all ConnectionObjects in EventObject.Connections and their corresponding callback functions.
+> Fires the event, triggering all ConnectionObjects in EventObject.Connections and their corresponding callback functions.
 
 <br><br>
 
