@@ -1,20 +1,26 @@
---[[
-Fast and lightweight custom Luau scriptevent implementation
-
-Made by TommyLuau (TommyRBLX)
---]]
-
 --!strict
+
+--[[
+	Event - Blazing-fast and lightweight Luau scriptevent implementation
+	Learn the about Event and it's API here: https://github.com/rT0mmy/Event
+
+	Made by Tommy (Twitter: TommyRBLX, Roblox: thenitropl, Github: rT0mmy)
+--]]
 
 local Events = {Events = {}}
 Events.__index = Events
+Events.__class = "Event"
 
 local Connections = {}
 Connections.__index = Connections
+Connections.__class = "Connection"
+
 
 local format = string.format
 
 --// Luau Typechecking
+
+type Primitive = number|string|boolean|{}
 
 export type Event = typeof(setmetatable({}, {})) & {
     Connect:()->Connection,
@@ -39,7 +45,7 @@ export type Connection = typeof(setmetatable({}, {})) & {
 
 function Connections.new(event:Event, f:()->any):Connection
     local self = {
-        f = f::()->any,
+        f = f::(any)->any,
         Event = event
     }
     self.Id = #self.Event.Connections+1
@@ -56,10 +62,11 @@ function Connections:Trigger(...:any):nil
     return
 end
 
-function Connections:Disconnect():nil
+function Connections:Disconnect()
     self.f = nil
+	self.Event = nil
 
-    return
+	setmetatable(self, nil)
 end
 
 --// Event object
@@ -68,7 +75,7 @@ function Events.new(name: string):Event|nil
 	if Events.Events[name] then return warn(format('[EVENT:] Event with name %q already exists.', name)) end
 
     local self = {
-        Name = name or (tonumber(tick())),
+        Name = name or tostring(#Events.Events),
 		Connections = {},
     }
 
@@ -84,6 +91,10 @@ function Events:Connect(f:()->any):Connection
     return self.Connections[#self.Connections+1]
 end
 
+function Events:Fire(...)
+	for _,v in self.Connections do v.f(...) end
+end
+
 function Events:TerminateConnections():nil
     for _,v in self.Connections do
         v:Disconnect()
@@ -97,8 +108,17 @@ end
 function Events:Terminate()
 	self:TerminateConnections()
 	Events.Events[self.Name] = nil
+
+	setmetatable(self, nil)
 end
 
-Events.__call = Events.new
+return setmetatable({},{
+	__call = function(_,s)
+		return Events.new(s)
+	end,
 
-return setmetatable(Events,Events)
+	__index = function(_,k)
+		if type(rawget(Events,k)) == 'function' then return end
+		return Events[k]
+	end,
+})
