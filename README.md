@@ -1,6 +1,6 @@
 <div align="center">
 	<h1>Event</h1>
-	<p> > Fast & Lightweight Luau scriptevent implementation. < </p>
+	<p> Fast & Lightweight Luau scriptevent implementation. </p>
   
   ![Luau](https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white)
   <br><br>
