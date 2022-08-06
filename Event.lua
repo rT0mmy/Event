@@ -1,18 +1,18 @@
 --[[
 Fast and lightweight custom Luau scriptevent implementation
 
-Made by Tommy (TommyRBLX, thenitropl)
+Made by TommyLuau (TommyRBLX)
 --]]
 
 --!strict
 
-local format = string.format
-
-local Events = {}
+local Events = {Events = {}}
 Events.__index = Events
 
 local Connections = {}
 Connections.__index = Connections
+
+local format = string.format
 
 --// Luau Typechecking
 
@@ -49,52 +49,56 @@ function Connections.new(event:Event, f:()->any):Connection
     return self
 end
 
-function Connections:Trigger(...:any)
-    if self.f then
-        local args = {...}
-        task.spawn(function()self.f(unpack(args))end)
-    else
-        warn(format("[EVENT-%s]: %s has 0 active Connections.", self.Event.Name, self.Event.Name))
-    end
+function Connections:Trigger(...:any):nil
+    local args = {...}
+    task.spawn(function()self.f(unpack(args))end)
+
+    return
 end
 
-function Connections:Disconnect()
+function Connections:Disconnect():nil
     self.f = nil
-    self.Event.Connections[self.Id] = nil
+
+    return
 end
 
 --// Event object
 
-function Events.new(name: string):Event
+function Events.new(name: string):Event|nil
+	if Events.Events[name] then return warn(format('[EVENT:] Event with name %q already exists.', name)) end
+
     local self = {
-        Name = name or (tostring(tick())),
-        Connections = {}
+        Name = name or (tonumber(tick())),
+		Connections = {},
     }
 
-    local self = setmetatable(self :: any, {
-        __index = Events,
-        __tostring = function():string
-            return format("[EVENT-%s]: (%i active connection(s))", self.Name, #self.Connections)
-        end
-    })
+	local self = setmetatable(self :: any, Events)
+	Events.Events[self.Name] = self
 
     return self
 end
 
 function Events:Connect(f:()->any):Connection
-    local c = Connections.new(self :: Event, f)
-    self.Connections[#self.Connections+1] = c
+    self.Connections[#self.Connections+1] = Connections.new(self :: Event, f)
 
-    return c
+    return self.Connections[#self.Connections+1]
 end
 
-function Events:Fire(...:any)
-    for _,v in self.Connections do v:Trigger(...) end
-end
+function Events:TerminateConnections():nil
+    for _,v in self.Connections do
+        v:Disconnect()
+    end
 
-function Events:TerminateConnections()
-    for _,v in self.Connections do v:Disconnect()end
     self.Connections = {}
+
+    return
 end
 
-return Events.new
+function Events:Terminate()
+	self:TerminateConnections()
+	Events.Events[self.Name] = nil
+end
+
+Events.__call = Events.new
+
+return setmetatable(Events,Events)
