@@ -59,10 +59,21 @@ Event "EventName"
 Event:GetEvents()
 ```
 ```lua
-Event:GetEvents().NewEvent:Fire(...)
+Event:GetEvents().NewEvent:Connect(function() ... end)
 ```
 
 > Returns a table with all existing ```EventObjects```
+
+<br><br>
+
+```lua
+Event:GetActiveEvents()
+```
+```lua
+Event:GetActiveEvents().NewEvent:Fire(...)
+```
+
+> Returns a table with all active ```EventObjects```
 
 <br><br>
 
@@ -73,7 +84,7 @@ Event.Events -> {[string]: EventObject}
 Event.Events.NewEvent:Fire(...)
 ```
 
-> Contains all ```EventObject```s
+> Contains all ```EventObjects```
 
 <br><br>
 
