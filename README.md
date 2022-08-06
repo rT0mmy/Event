@@ -1,20 +1,20 @@
 <div align="center">
-	<h1>Luau Event</h1>
+	<h1>Event</h1>
 	<p> > Fast & Lightweight Luau scriptevent implementation. < </p>
   
   ![Luau](https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white)
   <br><br>
   Made by TommyRBLX
   
-  <img src="https://img.shields.io/github/forks/rT0mmy/event?style=for-the-badge">
+  <img src="https://img.shields.io/github/forks/rT0mmy/Event?style=for-the-badge">
 
-  <img src="https://img.shields.io/github/stars/rT0mmy/event?style=for-the-badge">
+  <img src="https://img.shields.io/github/stars/rT0mmy/Event?style=for-the-badge">
 
-  <img src="https://img.shields.io/github/issues/rT0mmy/event?style=for-the-badge">
+  <img src="https://img.shields.io/github/issues/rT0mmy/Event?style=for-the-badge">
 
-  <img src="https://img.shields.io/github/issues-pr/rT0mmy/event?style=for-the-badge">
+  <img src="https://img.shields.io/github/issues-pr/rT0mmy/Event?style=for-the-badge">
 
-  <img src="https://img.shields.io/github/license/rT0mmy/event?style=for-the-badge">
+  <img src="https://img.shields.io/github/license/rT0mmy/Event?style=for-the-badge">
 </div>
 
 <br><br><br><br>
