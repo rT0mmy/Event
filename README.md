@@ -56,6 +56,28 @@ Event "EventName"
 <br><br>
 
 ```lua
+Event:GetEvents()
+```
+```lua
+Event:GetEvents().NewEvent:Fire(...)
+```
+
+> Returns a table with all existing ```EventObjects```
+
+<br><br>
+
+```lua
+Event.Events -> {[string]: EventObject}
+```
+```lua
+Event.Events.NewEvent:Fire(...)
+```
+
+> Contains all ```EventObject```s
+
+<br><br>
+
+```lua
 EventObject:Connect(Callback: ()) -> ConnectionObject
 ```
 ```lua
@@ -76,6 +98,17 @@ ConnectionObject:Disconnect()
 ```
 
 > Disconnects ```ConnectionObject``` from Event, thus removing it from ```EventObject.Connections``` too
+
+<br><br>
+
+```lua
+ConnectionObject:GetActiveConnections() -> {[number]: ConnectionObject}
+```
+```lua
+ConnectionObject:GetActiveConnections()[1]:Trigger()
+```
+
+> Returns a table with all active ```ConnectionObjects```.
 
 <br><br>
 
