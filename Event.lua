@@ -112,13 +112,28 @@ function Events:Terminate()
 	setmetatable(self, nil)
 end
 
+function Events:GetEvents()
+	return Events.Events
+end
+
+function Events:GetActiveEvents()
+	local t = {}
+
+	for _,v in Events.Events do
+		if #v.Connections > 0 then t[v.Name] = v end
+	end
+
+	return t
+end
+
+
 return setmetatable({},{
 	__call = function(_,s)
 		return Events.new(s)
 	end,
 
 	__index = function(_,k)
-		if type(rawget(Events,k)) == 'function' then return end
+		if type(rawget(Events,k)) == 'function' and (k~='GetEvents' and k~='GetActiveEvents') then return end
 		return Events[k]
 	end,
 })
