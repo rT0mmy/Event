@@ -5,6 +5,15 @@
 	Learn the about Event and it's API here: https://github.com/rT0mmy/Event
 
 	Made by Tommy (Twitter: TommyRBLX, Roblox: thenitropl, Github: rT0mmy)
+
+	Copyright (c) 2022 TommyRBLX
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so.
 --]]
 
 local Events = {Events = {}}
