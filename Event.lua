@@ -18,11 +18,11 @@
 
 local Events = {Events = {}}
 Events.__index = Events
-Events.__class = "Event"
+Events.__type = "Event"
 
 local Connections = {}
 Connections.__index = Connections
-Connections.__class = "Connection"
+Connections.__type = "Connection"
 
 
 local format = string.format
@@ -32,47 +32,47 @@ local format = string.format
 type Primitive = number|string|boolean|{}
 
 export type Event = typeof(setmetatable({}, {})) & {
-    Connect:()->Connection,
-    TerminateConnections:()->nil,
-    Fire:()->nil,
+	Connect:()->Connection,
+	TerminateConnections:()->nil,
+	Fire:()->nil,
 
-    Connections:{},
-    Name:string
+	Connections:{},
+	Name:string
 }
 
 
 export type Connection = typeof(setmetatable({}, {})) & {
-    Trigger:()->nil,
-    Disconnect:()->nil,
+	Trigger:()->nil,
+	Disconnect:()->nil,
 
-    f:()->any,
-    Event:Event,
-    Id:number
+	f:()->any,
+	Event:Event,
+	Id:number
 }
 
 --// Connection Object
 
 function Connections.new(event:Event, f:()->any):Connection
-    local self = {
-        f = f::(any)->any,
-        Event = event
-    }
-    self.Id = #self.Event.Connections+1
+	local self = {
+		f = f::(any)->any,
+		Event = event
+	}
+	self.Id = #self.Event.Connections+1
 
-    local self = setmetatable(self :: any, Connections)
+	local self = setmetatable(self :: any, Connections)
 
-    return self
+	return self
 end
 
-function Connections:Trigger(...:any):nil
-    local args = {...}
-    task.spawn(function()self.f(unpack(args))end)
+function Connections:Trigger(...:any)
+	local args = {...}
+	task.spawn(function()self.f(unpack(args))end)
 
-    return
+	return
 end
 
 function Connections:Disconnect()
-    self.f = nil
+	self.f = nil
 	self.Event = nil
 
 	setmetatable(self, nil)
@@ -80,24 +80,24 @@ end
 
 --// Event object
 
-function Events.new(name: string):Event|nil
-	if Events.Events[name] then return warn(format('[EVENT:] Event with name %q already exists.', name)) end
+function Events.new(name: string):Event
+	local self = {
+		Name = name,
+		Id = #Events.Events+1,
 
-    local self = {
-        Name = name or tostring(#Events.Events),
 		Connections = {},
-    }
+	}
 
 	local self = setmetatable(self :: any, Events)
-	Events.Events[self.Name] = self
+	Events.Events[self.Id] = self
 
-    return self
+	return self
 end
 
 function Events:Connect(f:()->any):Connection
-    self.Connections[#self.Connections+1] = Connections.new(self :: Event, f)
+	self.Connections[#self.Connections+1] = Connections.new(self :: Event, f)
 
-    return self.Connections[#self.Connections+1]
+	return self.Connections[#self.Connections+1]
 end
 
 function Events:Fire(...)
@@ -105,18 +105,18 @@ function Events:Fire(...)
 end
 
 function Events:TerminateConnections():nil
-    for _,v in self.Connections do
-        v:Disconnect()
-    end
+	for _,v in self.Connections do
+		v:Disconnect()
+	end
 
-    self.Connections = {}
+	self.Connections = {}
 
-    return
+	return
 end
 
 function Events:Terminate()
 	self:TerminateConnections()
-	Events.Events[self.Name] = nil
+	Events.Events[self.Id] = nil
 
 	setmetatable(self, nil)
 end
@@ -129,7 +129,7 @@ function Events:GetActiveEvents()
 	local t = {}
 
 	for _,v in Events.Events do
-		if #v.Connections > 0 then t[v.Name] = v end
+		if #v.Connections > 0 then t[v.Id] = v end
 	end
 
 	return t
