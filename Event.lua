@@ -194,4 +194,7 @@ function Event.GetActiveEvents()
 end
 
 
-return Event
+return setmetatable({},{
+	__index = Event,
+	__call = Event.new
+})
