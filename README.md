@@ -52,6 +52,16 @@ Event "EventName"
 ```
 
 > Creates a new ```EventObject```
+<br>
+
+```lua
+Event.new(EventName: {}) -> EventObject
+```
+```lua
+Event.new("EventName")
+```
+
+> Also creates a new ```EventObject```
 
 <br><br>
 
@@ -146,6 +156,17 @@ EventObject:Fire("Hello World!", "\n Luau is great!")
 <br><br>
 
 ```lua
+EventObject:FireOnce(...) -> nil
+```
+```lua
+EventObject:Fire("I no longer exist!")
+```
+
+> Fires the event, and then gets terminated, cleaning up any remaining connections.
+
+<br><br>
+
+```lua
 EventObject:TerminateConnections() -> nil
 ```
 ```lua
@@ -157,13 +178,29 @@ EventObject:TerminateConnections()
 <br><br>
 
 ```lua
-EventObject:Terminate() -> nil
+EventObject:Destroy() -> nil
 ```
 ```lua
-EventObject:Terminate()
+EventObject:Destroy()
 ```
 
 > Destroys ```EventObject```, thus also destroying all ```EventConnection```s in ```EventObject.Connections```
+
+<br><br><br><br>
+
+#New wrapped events
+
+<br><br>
+
+```lua
+Event.wrap(BindableEvent|RBXScriptSignal) -> EventObject
+```
+```lua
+Event.wrap(Instance.new("BindableEvent"), "Test1")
+Event.wrap(workspace.Model.ChildAdded, "WorkspaceChildAdd")
+```
+
+> Creates a new ```EventObject```, wrapped around provided RBXScriptSignal or BindableEvent, on removal, all connections get cleaned up; similarly to maid.
 
 ## Demo
 
