@@ -34,6 +34,9 @@
 Event allows easy and blazing fast setup of custom scriptevents, does not require any external dependencies. 
 Straightforward and beginner friendly syntax that is suitable for everyone. 
 
+Why use Event over Maids?:
+Event provides both the creation of BindableEvents and automatic cleanup on removal. Event also allows for direct connection of RBXScriptSignal(s).
+
 <br><br><br><br>
 
 ## API
