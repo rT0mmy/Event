@@ -202,7 +202,9 @@ Event.wrap(workspace.Model.ChildAdded, "WorkspaceChildAdd")
 
 > Creates a new ```EventObject```, wrapped around provided RBXScriptSignal or BindableEvent, on removal, all connections get cleaned up; similarly to maid.
 
-## Demo
+<br><br>
+
+## API Demo
 
 
 ```lua
