@@ -16,19 +16,15 @@
 	furnished to do so.
 --]]
 
-local Events = {Events = {}}
-Events.__index = Events
-Events.__type = "Event"
+local Event = {Events = {}}
+Event.__index = Event
+Event.__type = "Event"
 
-local Connections = {}
-Connections.__index = Connections
-Connections.__type = "Connection"
-
-
-local format = string.format
+local Connection = {}
+Connection.__index = Connection
+Connection.__type = "Connection"
 
 --// Luau Typechecking
-
 type Primitive = number|string|boolean|{}
 
 export type Event = typeof(setmetatable({}, {})) & {
@@ -38,6 +34,18 @@ export type Event = typeof(setmetatable({}, {})) & {
 
 	Connections:{},
 	Name:string
+}
+
+export type WrappedEvent = typeof(setmetatable({}, {})) & {
+	Connect:()->Connection,
+	TerminateConnections:()->nil,
+	Fire:()->nil,
+
+	Connections:{},
+	Name:string,
+
+	Event:RBXScriptSignal,
+	WrappedConnection:RBXScriptConnection
 }
 
 
@@ -52,26 +60,24 @@ export type Connection = typeof(setmetatable({}, {})) & {
 
 --// Connection Object
 
-function Connections.new(event:Event, f:()->any):Connection
+function Connection.new(event:Event, f:()->any):Connection
 	local self = {
 		f = f::(any)->any,
 		Event = event
 	}
 	self.Id = #self.Event.Connections+1
 
-	local self = setmetatable(self :: any, Connections)
-
+	local self = setmetatable(self :: any, Connection)
 	return self
 end
 
-function Connections:Trigger(...:any)
+
+function Connection:Trigger(...:any)
 	local args = {...}
 	task.spawn(function()self.f(unpack(args))end)
-
-	return
 end
 
-function Connections:Disconnect()
+function Connection:Disconnect()
 	self.f = nil
 	self.Event = nil
 
@@ -80,31 +86,76 @@ end
 
 --// Event object
 
-function Events.new(name: string):Event
+function Event.new(name: string):Event
+	if Event.Events[name] then name = name..math.floor(tick()) end
+
 	local self = {
 		Name = name,
-		Id = #Events.Events+1,
+		Id = #Event.Events+1,
 
 		Connections = {},
 	}
 
-	local self = setmetatable(self :: any, Events)
-	Events.Events[self.Id] = self
+	local self = setmetatable(self :: any, Event)
+	Event.Events[self.Id] = self
 
 	return self
 end
 
-function Events:Connect(f:()->any):Connection
-	self.Connections[#self.Connections+1] = Connections.new(self :: Event, f)
+--// Event instance wrapper and maid
+function Event.wrap(EventObject:(BindableEvent|RBXScriptSignal)|string, name:string):WrappedEvent|nil
+	if not EventObject or type(EventObject) == 'string' then
+		EventObject = Instance.new('BindableEvent')
+	end
 
-	return self.Connections[#self.Connections+1]
+	if typeof(EventObject) == 'Instance' and EventObject:IsA('BindableEvent') then
+		EventObject = EventObject.Event
+	end
+
+	if typeof(EventObject) == "RBXScriptSignal" then
+		local self = {
+			Name = name,
+			Id = #Event.Events+1,
+
+			Connections = {},
+
+			Event = EventObject,
+		}
+
+		local self = setmetatable(self :: any, Event)
+		Event.Events[self.Id] = self
+
+		self.WrappedConnection = self.Event:Connect(function(...)
+			self:Fire(...)
+		end)
+
+		return self
+	end
+
+	return error("[Event]: Could not wrap '"..tostring(EventObject).."'")
 end
 
-function Events:Fire(...)
+Event.wrapped = Event.wrap
+
+function Event:Connect(f:()->any):Connection
+	if not f then error('[Event]: Could not connect, function cannot be false or nil') end
+	
+	local c = Connection.new(self :: Event, f)
+	
+	self.Connections[#self.Connections+1] = c
+	return c
+end
+
+function Event:Fire(...)
 	for _,v in self.Connections do v.f(...) end
 end
 
-function Events:TerminateConnections():nil
+function Event:FireOnce(...)
+	for _,v in self.Connections do v.f(...) end
+	self:Destroy()
+end
+
+function Event:TerminateConnections():nil
 	for _,v in self.Connections do
 		v:Disconnect()
 	end
@@ -114,21 +165,28 @@ function Events:TerminateConnections():nil
 	return
 end
 
-function Events:Terminate()
+function Event:Destroy()
+	if self.Event then
+		self.WrappedConnection:Disconnect()
+		self.Event:Destroy()
+	end
+
 	self:TerminateConnections()
-	Events.Events[self.Id] = nil
+	Event.Events[self.Id] = nil
 
 	setmetatable(self, nil)
 end
 
-function Events:GetEvents()
-	return Events.Events
+--
+
+function Event.GetEvents()
+	return Event.Events
 end
 
-function Events:GetActiveEvents()
+function Event.GetActiveEvents()
 	local t = {}
 
-	for _,v in Events.Events do
+	for _,v in Event.Events do
 		if #v.Connections > 0 then t[v.Id] = v end
 	end
 
@@ -136,13 +194,4 @@ function Events:GetActiveEvents()
 end
 
 
-return setmetatable({},{
-	__call = function(_,s)
-		return Events.new(s)
-	end,
-
-	__index = function(_,k)
-		if type(rawget(Events,k)) == 'function' and (k~='GetEvents' and k~='GetActiveEvents') then return end
-		return Events[k]
-	end,
-})
+return Event
