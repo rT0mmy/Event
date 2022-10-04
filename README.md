@@ -36,12 +36,12 @@ Straightforward and beginner friendly syntax that is suitable for everyone.
 
 <br>
 
-# Why use Event over Maids?
+### Why use Event over Maids?
 Event provides both the creation of BindableEvents and automatic cleanup on removal. Event also allows for direct connection of RBXScriptSignal(s).
 
 <br>
 
-# Changelog
+### Changelog
 
 The new wrapped events allow for easy organizaton and disposal of BindableEvents and RBXScriptSignal(s) connections. Check out the API [here](https://github.com/rT0mmy/Event#new-wrapped-events)
 
