@@ -16,13 +16,15 @@
 	furnished to do so.
 --]]
 
-local Event = {Events = {}}
+local Event = {}
 Event.__index = Event
 Event.__type = "Event"
+--Event.__mode = "vk"
 
 local Connection = {}
 Connection.__index = Connection
 Connection.__type = "Connection"
+--Connection.__mode = "vk"
 
 --// Luau Typechecking
 type Primitive = number|string|boolean|{}
@@ -30,7 +32,7 @@ type Primitive = number|string|boolean|{}
 export type Event = typeof(setmetatable({}, {})) & {
 	Connect:()->Connection,
 	TerminateConnections:()->nil,
-	Fire:()->nil,
+	Fire:(self:Event, ...any)->any,
 
 	Connections:{},
 	Name:string
@@ -39,7 +41,7 @@ export type Event = typeof(setmetatable({}, {})) & {
 export type WrappedEvent = typeof(setmetatable({}, {})) & {
 	Connect:()->Connection,
 	TerminateConnections:()->nil,
-	Fire:()->nil,
+	Fire:(self:WrappedEvent, ...any)->nil,
 
 	Connections:{},
 	Name:string,
@@ -55,7 +57,6 @@ export type Connection = typeof(setmetatable({}, {})) & {
 
 	f:()->any,
 	Event:Event,
-	Id:number
 }
 
 --// Connection Object
@@ -65,10 +66,8 @@ function Connection.new(event:Event, f:()->any):Connection
 		f = f::(any)->any,
 		Event = event
 	}
-	self.Id = #self.Event.Connections+1
 
-	local self = setmetatable(self :: any, Connection)
-	return self
+	return setmetatable(self :: any, Connection)
 end
 
 
@@ -87,19 +86,13 @@ end
 --// Event object
 
 function Event.new(name: string):Event
-	if Event.Events[name] then name = name..math.floor(tick()) end
-
 	local self = {
 		Name = name,
-		Id = #Event.Events+1,
 
 		Connections = {},
 	}
 
-	local self = setmetatable(self :: any, Event)
-	Event.Events[self.Id] = self
-
-	return self
+	return setmetatable(self :: any, Event)
 end
 
 --// Event instance wrapper and maid
@@ -115,7 +108,6 @@ function Event.wrap(EventObject:(BindableEvent|RBXScriptSignal)|string, name:str
 	if typeof(EventObject) == "RBXScriptSignal" then
 		local self = {
 			Name = name,
-			Id = #Event.Events+1,
 
 			Connections = {},
 
@@ -123,8 +115,6 @@ function Event.wrap(EventObject:(BindableEvent|RBXScriptSignal)|string, name:str
 		}
 
 		local self = setmetatable(self :: any, Event)
-		Event.Events[self.Id] = self
-
 		self.WrappedConnection = self.Event:Connect(function(...)
 			self:Fire(...)
 		end)
@@ -135,19 +125,36 @@ function Event.wrap(EventObject:(BindableEvent|RBXScriptSignal)|string, name:str
 	return error("[Event]: Could not wrap '"..tostring(EventObject).."'")
 end
 
+function Event:BindToDestroy(Object: Instance)
+	if not Object then return end
+
+	local OnDestroy = Object.Destroying:Once(function()
+		if not Object then return end
+
+		warn('Object '..Object.Name..' destroyed, terminating events')
+		self:Destroy()
+	end)
+
+	self.OnDestroyBind = OnDestroy
+
+	return self
+end
+
 Event.wrapped = Event.wrap
 
 function Event:Connect(f:()->any):Connection
 	if not f then error('[Event]: Could not connect, function cannot be false or nil') end
-	
+
 	local c = Connection.new(self :: Event, f)
-	
+
 	self.Connections[#self.Connections+1] = c
 	return c
 end
 
 function Event:Fire(...)
-	for _,v in self.Connections do v.f(...) end
+	for _,v in self.Connections do if v.f then v.f(...) end end
+
+	return self
 end
 
 function Event:FireOnce(...)
@@ -155,7 +162,7 @@ function Event:FireOnce(...)
 	self:Destroy()
 end
 
-function Event:TerminateConnections():nil
+function Event:TerminateConnections()
 	for _,v in self.Connections do
 		v:Disconnect()
 	end
@@ -168,33 +175,24 @@ end
 function Event:Destroy()
 	if self.Event then
 		self.WrappedConnection:Disconnect()
-		self.Event:Destroy()
+
+		if typeof(self.Event) == 'Instance' then
+			self.Event:Destroy()
+		end
+	end
+
+	if self.OnDestroyBind then
+		self.OnDestroyBind:Disconnect()
 	end
 
 	self:TerminateConnections()
-	Event.Events[self.Id] = nil
 
 	setmetatable(self, nil)
 end
 
---
-
-function Event.GetEvents()
-	return Event.Events
-end
-
-function Event.GetActiveEvents()
-	local t = {}
-
-	for _,v in Event.Events do
-		if #v.Connections > 0 then t[v.Id] = v end
-	end
-
-	return t
-end
-
-
 return setmetatable({},{
 	__index = Event,
-	__call = Event.new
+	__call = function(_,...)
+		return Event.new(...)
+	end,
 })
