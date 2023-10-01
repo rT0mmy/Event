@@ -177,6 +177,9 @@ end
 <br>
 
 ```lua
+
+-- Script A
+
 local Event = require(...)
 
 local ClientEvents = {
@@ -186,6 +189,19 @@ local ClientEvents = {
 }
 
 return ClientEvents
+
+-- Script B
+
+local ClientEvents = require(ScriptA...)
+
+local function TakeDamage(n)
+	...
+	ClientEvents.onClientDamaged:Fire(n)
+	if Client.Health <= 0 then
+		ClientEvents.onClientDead:Fire()
+	end
+	...
+end
 
 ```
 
