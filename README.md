@@ -154,5 +154,39 @@ newEventConnection:Disconnect()
 newEvent:Fire("Hello", "World 2") -- // Doesn't print "Hell World 2", because the ConnectionObject "newEventConnection" was disconnected beforehand.
 
 ```
+<br>
+
+```lua
+local Event = require(...)
+
+local EventProcessAB = Event "ProcessAB"
+
+function ProcessAB()
+	local success, result = EventProcessAB:Wait(4)
+	
+	if success then
+		print('A + B = '..result)
+	else
+		print('Server failed to deliver :(')
+	end
+end
+
+
+```
+
+<br>
+
+```lua
+local Event = require(...)
+
+local ClientEvents = {
+	onClientDead = Event 'onClientDeath',
+	onClientDamaged = Event 'onClientDamaged',
+	onClientStatusChanged = Event 'onClientStatusChanged'
+}
+
+return ClientEvents
+
+```
 
 
