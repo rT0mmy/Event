@@ -1,10 +1,9 @@
 <div align="center">
-	<h1>Event</h1>
-	<p> Fast & Lightweight Luau scriptevent implementation </p>
+	<h1 style="color:blue;text-align:center">Event</h1>
+	<p> Fast & Lightweight Luau scriptevent </p>
   
   ![Luau](https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white)
   <br><br>
-  Made by TommyRBLX
   
   <img src="https://img.shields.io/github/forks/rT0mmy/Event?style=for-the-badge">
 
@@ -20,32 +19,19 @@
 <br><br><br><br>
 
 > **Warning** <br>
-> Event is still under development, major changes might occur.
+> Event is under development
 
 <br><br>
 
-> **Note** <br>
-> Event is a instance of scriptevent, meaning that client - server and vice versa communication is not possible.
-
-<br><br><br><br>
-
 ## Why Event?
+Event is an API meticulously crafted to simplify event management, making your code more readable, maintainable, and responsive;
+It's lightweight and straightforward structure makes it extremly easy to implement into your workflow.
 
-Event allows easy and blazing fast setup of custom scriptevents, does not require any external dependencies. 
-Straightforward and beginner friendly syntax that is suitable for everyone. 
+Event offers intuitive and clean API structure, designed to minimize complexity while maximizing functionality.
 
-<br>
+_Empower your projects with the blazing fast **Event**_
 
-### Why use Event over Maids?
-Event provides both the creation of BindableEvents and automatic cleanup on removal. Event also allows for direct connection of RBXScriptSignal(s).
-
-<br>
-
-### Changelog
-
-The new wrapped events allow for easy organizaton and disposal of BindableEvents and RBXScriptSignal(s) connections. Check out the API [here](https://github.com/rT0mmy/Event#new-wrapped-events)
-
-<br><br><br><br>
+<br><br><br>
 
 ## API
 
@@ -55,105 +41,70 @@ local Event = require(...)
 
 <br><br>
 
+> Creating a new ```EventObject```
 ```lua
-Event(EventName: {}) -> EventObject
+Event(EventName: string?) -> EventObject
 ```
 ```lua
-Event "EventName"
+local newEvent = Event "EventName"
 ```
-
-> Creates a new ```EventObject```
-<br>
-
-```lua
-Event.new(EventName: {}) -> EventObject
-```
-```lua
-Event.new("EventName")
-```
-
-> Also creates a new ```EventObject```
 
 <br><br>
 
+> Creates a new ```Connection``` for the specified ```EventObject```
+
 ```lua
-Event:GetEvents()
+EventObject:Connect(Callback: ()) -> Connection
 ```
 ```lua
-Event:GetEvents().EventName:Connect(function() ... end)
-```
-
-> Returns a table with all existing ```EventObjects```
-
-<br><br>
-
-```lua
-Event:GetActiveEvents()
-```
-```lua
-Event:GetActiveEvents().EventName:Fire(...)
-```
-
-> Returns a table with all active ```EventObjects```
-
-<br><br>
-
-```lua
-Event.Events -> {[string]: EventObject}
-```
-```lua
-Event.Events.EventName:Fire(...)
-```
-
-> Contains all ```EventObjects```
-
-<br><br>
-
-```lua
-EventObject:Connect(Callback: ()) -> ConnectionObject
-```
-```lua
-EventObject:Connect(function(...)
+local newConnection = EventObject:Connect(function(...)
 	print(...)
 end)
 ```
 
-> Creates a new ```ConnectionObject``` stored in ```EventObject.Connections```, rendering it connected to the Event.
+<br><br>
+
+> Creates a new single-use ```Connection``` for the specified ```EventObject```
+
+```lua
+EventObject:Once(Callback: ()) -> Connection
+```
+```lua
+local newConnection = EventObject:Once(function(...)
+	print(...)
+end)
+
+print(newConnection) --> nil
+```
 
 <br><br>
+
+> Creates a new asynchronous ```Connection``` for the specified ```EventObject```, thus yielding the runtime code until the event is triggered.
+> An optional argument ```t``` defines how long the code will yield until the Wait method is terminated and fails.
+
+```lua
+EventObject:Wait(t: number?) -> Connection
+```
+```lua
+local success, result = EventObject:Wait(2)
+
+print(success, result)
+```
+
+<br><br>
+
+> Disconnects and collects the ```Connection``` from Event
 
 ```lua
 ConnectionObject:Disconnect() -> nil
 ```
 ```lua
-ConnectionObject:Disconnect()
+newConnection:Disconnect()
 ```
-
-> Disconnects ```ConnectionObject``` from Event, thus removing it from ```EventObject.Connections``` too
 
 <br><br>
 
-```lua
-ConnectionObject:GetActiveConnections() -> {[number]: ConnectionObject}
-```
-```lua
-ConnectionObject:GetActiveConnections()[1]:Trigger()
-```
-
-> Returns a table with all active ```ConnectionObjects```.
-
-<br><br>
-
-```lua
-ConnectionObject:Trigger(...) -> nil
-```
-```lua
-ConnectionObject:Trigger("Hello World!", "Luau is great!")
-```
-
-> Triggers the ```ConnectionObject``` - calling the connected callback function.
-
-<br><br>
+> Fires the event, triggering all ```Connection```s (Callbacks)
 
 ```lua
 EventObject:Fire(...) -> nil
@@ -162,31 +113,20 @@ EventObject:Fire(...) -> nil
 EventObject:Fire("Hello World!", "\n Luau is great!")
 ```
 
-> Fires the event, triggering all ```ConnectionObject```s in ```EventObject.Connections``` and their corresponding callback functions.
+<br><br>
+
+> Terminates all ```Connection```s from the ```EventObject```
+> 
+```lua
+EventObject:DisconnectAll() -> nil
+```
+```lua
+EventObject:DisconnectAll()
+```
 
 <br><br>
 
-```lua
-EventObject:FireOnce(...) -> nil
-```
-```lua
-EventObject:Fire("I no longer exist!")
-```
-
-> Fires the event, and then gets terminated, cleaning up any remaining connections.
-
-<br><br>
-
-```lua
-EventObject:TerminateConnections() -> nil
-```
-```lua
-EventObject:TerminateConnections()
-```
-
-> Terminates all Connections from ```EventObject.Connections```
-
-<br><br>
+> Destroys ```EventObject```, thus also destroying and collecting all ```Connection```s
 
 ```lua
 EventObject:Destroy() -> nil
@@ -195,27 +135,9 @@ EventObject:Destroy() -> nil
 EventObject:Destroy()
 ```
 
-> Destroys ```EventObject```, thus also destroying all ```EventConnection```s in ```EventObject.Connections```
+<br><br><br>
 
-<br><br><br><br>
-
-#### New wrapped events
-
-<br><br>
-
-```lua
-Event.wrap(BindableEvent|RBXScriptSignal) -> EventObject
-```
-```lua
-Event.wrap(Instance.new("BindableEvent"), "Test1")
-Event.wrap(workspace.Model.ChildAdded, "WorkspaceChildAdd")
-```
-
-> Creates a new ```EventObject```, wrapped around provided RBXScriptSignal or BindableEvent, on removal, all connections get cleaned up; similarly to maid.
-
-<br><br>
-
-## API Demo
+## API Sample Demo
 
 
 ```lua
