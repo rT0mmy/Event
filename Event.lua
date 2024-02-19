@@ -1,77 +1,52 @@
---!strict 
+--!strict
+--!native
+--!optimize 2
+
+type Callback<T...> = (T...) -> ()
+type Connection = ()->nil
+
+export type Event<T...> = {
+	Connections: {[number]: Callback<T...>},
+	
+	Connect: (self: Event<T...>, callback: Callback<T...>) -> Connection,
+	Once: (self: Event<T...>, callback: Callback<T...>) -> Connection,
+
+	Fire: (self: Event<T...>, T...) -> (),
+	Wait: (self: Event<T...>, timeout: number?) -> T...,
+
+	Destroy: (self: Event<T...>) -> (),
+}
 
 local Event = {}
 Event.__index = Event
-Event.__mode  = "k"
 
-export type Event = typeof(setmetatable({} :: {
-	Name: string?,
-	Connections: {[number]: Connection}
-}, Event))
-
-local Connection = {}
-Connection.__index = Connection
-Connection.__mode  = "k"
-
-export type Connection = typeof(setmetatable({} :: {
-	Callback:(() -> nil)?,
-}, Connection))
-
-Connection.new = function(f:()->nil): Connection
-	return setmetatable({
-		Callback = f, 
-	}, Connection)
-end
-
-function Connection:Disconnect()
-	self.Callback = nil
-	setmetatable(self, nil)
-end
-
-Event.new = function(name: string): Event
-	local self = setmetatable({
-		Name = tostring(name),
-		Connections = {},
-	}, Event)
-
-	return self :: Event
-end
-
-function Event.BindTo(self: Event, signal: RBXScriptSignal, cleanupInstance: Instance)
-	local signalConnection = signal:Connect(function(...)
-		self:Fire(...)
-	end)
-
-	if cleanupInstance then
-		self.CleanupConnection = cleanupInstance.Destroying:Once(function()
-			signalConnection:Disconnect()
-		end)
+function Event:Connect<T...>(callback)
+	local n = #self.Connections+1
+	self.Connections[n] = callback
+	
+	return function()
+		self.Connections[n] = nil
 	end
-
-	self.RBXScriptConnection = signalConnection
-
-	return signalConnection
 end
 
-function Event.Connect(self: Event, f:()->nil): Connection
-	local newConnection = Connection.new(f)
-	table.insert(self.Connections, newConnection)
-
-	return newConnection
-end
-
-function Event.Once(self: Event, f:()->nil): Connection
-
-	local newConnection
-	newConnection = self:Connect(function(...)
-		f(...)
-		newConnection:Disconnect()
+function Event:Once<T...>(callback)
+	local c
+	
+	c = self:Connect(function(...)
+		callback(...)
+		c()
 	end)
 
-	return newConnection
+	return c
 end
 
-function Event.Wait(self: Event, t: number?)
+function Event:Fire<T...>(...)
+	for _, v in self.Connections do
+		v(...)
+	end
+end
+
+function Event:Wait<T...>(timeout)
 	local yield = coroutine.running()
 
 	local function resumeCoroutine(...)
@@ -80,12 +55,12 @@ function Event.Wait(self: Event, t: number?)
 
 	local connection = Event.Once(self, resumeCoroutine)
 
-	if t then
-		task.delay(t, function()
+	if timeout then
+		task.delay(timeout, function()
 			resumeCoroutine()
 
 			if connection then
-				connection:Disconnect()
+				connection()
 			end
 		end)
 	end
@@ -93,33 +68,13 @@ function Event.Wait(self: Event, t: number?)
 	return coroutine.yield()
 end
 
-function Event.Fire(self: Event, ...: any)
-	for _,v in (self.Connections)::{Connection} do 
-		if v.Callback then 
-			v.Callback(...) 
-		end
-	end
-end
-
-function Event.DisconnectAll(self: Event)
-	for _,v in (self.Connections)::{Connection} do 
-		v:Disconnect()
-	end
-end
-
-function Event.Destroy(self: Event)
-	if self.RBXScriptConnection then
-		self.RBXScriptConnection:Disconnect()
-	end
-
-	if self.CleanupConnection then
-		self.CleanupConnection:Disconnect()
-	end
-
-	self:DisconnectAll()
-
+function Event:Destroy<T...>()
 	table.clear(self.Connections)
 	setmetatable(self, nil)
 end
 
-return Event.new
+return function<T...>(): Event<T...>
+	return setmetatable({
+		Connections = {}
+	}, Event) :: any
+end
