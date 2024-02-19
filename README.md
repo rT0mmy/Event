@@ -43,63 +43,60 @@ local Event = require(...)
 
 > Creating a new ```EventObject```
 ```lua
-Event(EventName: string?) -> EventObject
+Event() -> Event
 ```
 ```lua
-local newEvent = Event "EventName"
+local newEvent = Event()
 ```
 
 <br><br>
 
-> Creates a new ```Connection``` for the specified ```EventObject```
+> Creating a new ```Connection``` for the specified ```Event```
 
 ```lua
-EventObject:Connect(Callback: ()) -> Connection
+EventObject:Connect(Callback: (T...)) -> Connection
 ```
 ```lua
-local newConnection = EventObject:Connect(function(...)
-	print(...)
+local newConnection = EventObject:Connect(function(a: number, b: number)
+	print(a + b)
 end)
 ```
 
 <br><br>
 
-> Creates a new single-use ```Connection``` for the specified ```EventObject```
+> Creating a new single-use ```Connection``` for the specified ```Event```
 
 ```lua
-EventObject:Once(Callback: ()) -> Connection
+EventObject:Once(Callback: (T...)) -> Connection
 ```
 ```lua
-local newConnection = EventObject:Once(function(...)
-	print(...)
+local newConnection = EventObject:Once(function(a: number, b: number)
+	print(a + b)
 end)
-
-print(newConnection) --> nil
 ```
 
 <br><br>
 
-> Creates a new asynchronous ```Connection``` for the specified ```EventObject```, thus yielding the runtime code until the event is triggered.
-> An optional argument ```t``` defines how long the code will yield until the Wait method is terminated and fails.
+> Creating a new asynchronous ```Connection``` for the specified ```Event```, thus yielding the runtime code until the event is triggered.
+> An optional  ```timeout``` argument defines how long the code will yield until the Wait method is terminated and therefore fails.
 
 ```lua
-EventObject:Wait(t: number?) -> Connection
+EventObject:Wait(timeout: number?) -> Connection
 ```
 ```lua
-local success, result = EventObject:Wait(2)
-
-print(success, result)
+local success = EventObject:Wait(2)
+print(success)
 ```
 
 <br><br>
 
-> Disconnects and collects the ```Connection``` from Event
+> Disconnects the ```Connection``` from Event
 
 ```lua
-ConnectionObject:Disconnect() -> nil
+ConnectionObject()
 ```
 ```lua
-newConnection:Disconnect()
+newConnection()
 ```
 
 <br><br>
@@ -107,7 +104,7 @@ newConnection:Disconnect()
 > Fires the event, triggering all ```Connection```s (Callbacks)
 
 ```lua
-EventObject:Fire(...) -> nil
+EventObject:Fire(T...) -> nil
 ```
 ```lua
 EventObject:Fire("Hello World!", "\n Luau is great!")
@@ -115,7 +112,7 @@ EventObject:Fire("Hello World!", "\n Luau is great!")
 
 <br><br>
 
-> Terminates all ```Connection```s from the ```EventObject```
+> Terminates all ```Connection```s from the ```Event```
 > 
 ```lua
 EventObject:DisconnectAll() -> nil
@@ -126,7 +123,7 @@ EventObject:DisconnectAll()
 
 <br><br>
 
-> Destroys ```EventObject```, thus also destroying and collecting all ```Connection```s
+> Destroys ```Event```, therefore also disconnects all ```Connection```s
 
 ```lua
 EventObject:Destroy() -> nil
@@ -143,14 +140,14 @@ EventObject:Destroy()
 ```lua
 local Event = require(...)
 
-local newEvent = Event "newEvent"
-local newEventConnection = newEvent:Connect(function(...)
+local newEvent = Event()
+local newEventConnection = newEvent:Connect(function(...string)
     print(...)
 end)
 
 newEvent:Fire("Hello", "World") -- // -> Hello World
 
-newEventConnection:Disconnect()
+newEventConnection()
 newEvent:Fire("Hello", "World 2") -- // Doesn't print "Hell World 2", because the ConnectionObject "newEventConnection" was disconnected beforehand.
 
 ```
@@ -159,15 +156,15 @@ newEvent:Fire("Hello", "World 2") -- // Doesn't print "Hell World 2", because th
 ```lua
 local Event = require(...)
 
-local EventProcessAB = Event "ProcessAB"
+local EventProcessAB = Event()
 
 function ProcessAB()
-	local success, result = EventProcessAB:Wait(4)
+	local v = EventProcessAB:Wait(4)
 	
-	if success then
-		print('A + B = '..result)
+	if v then
+		print('A + B = '..v)
 	else
-		print('Server failed to deliver :(')
+		print('failed to deliver :(')
 	end
 end
 
@@ -183,9 +180,9 @@ end
 local Event = require(...)
 
 local ClientEvents = {
-	onClientDead = Event 'onClientDeath',
-	onClientDamaged = Event 'onClientDamaged',
-	onClientStatusChanged = Event 'onClientStatusChanged'
+	onClientDead = Event(),
+	onClientDamaged = Event(),
+	onClientStatusChanged = Event()
 }
 
 return ClientEvents
