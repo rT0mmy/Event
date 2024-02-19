@@ -30,7 +30,8 @@ It's lightweight and straightforward structure makes it extremly easy to impleme
 Event offers intuitive and clean API structure, designed to minimize complexity while maximizing functionality.
 
 _Empower your projects with the blazing fast **Event**_
-https://cdn.discordapp.com/attachments/1110985524786761854/1209198313392312440/image.png?ex=65e60caf&is=65d397af&hm=4e82f1ebeddc1e8f148376832a4dc4f2d7aa6daa00ff2779faa01f6c6178093f&
+ <img src="https://cdn.discordapp.com/attachments/1110985524786761854/1209198313392312440/image.png?ex=65e60caf&is=65d397af&hm=4e82f1ebeddc1e8f148376832a4dc4f2d7aa6daa00ff2779faa01f6c6178093f&">
+
 
 <br><br><br>
 
