@@ -29,7 +29,7 @@ export type Event<T...> = {
 local Event = {}
 
 --[=[
-    Creates a new ```Event<T...>
+    Creates a new Event<T...>
     
     @return Event<T...>
 ]=]
@@ -47,7 +47,7 @@ function Event.new<T...>(): Event<T...>
 end
 
 --[=[
-    Creates a new ```Connection``` for the ```Event<T...>```
+    Creates a new Connection for the Event<T...>
 
     @param callback (T...) -> nil
     @return Connection
@@ -124,7 +124,7 @@ function Event.Wait<T...>(self: Event<T...>, timeout: number?): ...any
 end
 
 --[=[
-   Destroys Event, therefore and clears all Connections
+   Destroys Event, therefore clears all Connections
 
     @return nil
 ]=]
