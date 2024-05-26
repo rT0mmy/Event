@@ -2,8 +2,17 @@
 --!native
 --!optimize 2
 
+--[=[
+    A simple API for blazing fast scriptevents
+
+    @examples - Can be found on the github repo, in examples section
+    https://github.com/rT0mmy/Event
+
+    @class Event<T...>
+]=]
+
 type Callback<T...> = (T...) -> ()
-type Connection = ()->nil
+export type Connection = ()->nil
 
 export type Event<T...> = {
 	Connections: {[number]: Callback<T...>},
@@ -12,15 +21,38 @@ export type Event<T...> = {
 	Once: (self: Event<T...>, callback: Callback<T...>) -> Connection,
 
 	Fire: (self: Event<T...>, T...) -> (),
-	Wait: (self: Event<T...>, timeout: number?) -> T...,
+	Wait: (self: Event<T...>, timeout: number?) -> ...any,
 
 	Destroy: (self: Event<T...>) -> (),
 }
 
 local Event = {}
-Event.__index = Event
 
-function Event:Connect<T...>(callback)
+--[=[
+    Creates a new ```Event<T...>
+    
+    @return Event<T...>
+]=]
+function Event.new<T...>(): Event<T...>
+	return {
+		Connections = {},
+
+		Destroy = Event.Destroy,
+		Connect = Event.Connect,
+
+		Once = Event.Once,
+		Fire = Event.Fire,
+		Wait = Event.Wait
+	}
+end
+
+--[=[
+    Creates a new ```Connection``` for the ```Event<T...>```
+
+    @param callback (T...) -> nil
+    @return Connection
+]=]
+function Event.Connect<T...>(self: Event<T...>, callback: Callback<T...>): Connection
 	local n = #self.Connections+1
 	self.Connections[n] = callback
 	
@@ -29,7 +61,13 @@ function Event:Connect<T...>(callback)
 	end
 end
 
-function Event:Once<T...>(callback)
+--[=[
+    Creates a new single-use Connection for the specified Event<T...>
+
+    @param callback (T...) -> nil
+    @return Connection
+]=]
+function Event.Once<T...>(self: Event<T...>, callback: Callback<T...>): Connection
 	local c
 	
 	c = self:Connect(function(...)
@@ -40,15 +78,32 @@ function Event:Once<T...>(callback)
 	return c
 end
 
-function Event:Fire<T...>(...)
+--[=[
+    Fires the event, triggering all Connections (callbacks)
+
+    @param (...) T...
+    @return nil
+]=]
+function Event.Fire<T...>(self: Event<T...>, ...:T...): nil
 	for _, v in self.Connections do
 		v(...)
 	end
+	
+	return
 end
 
-function Event:Wait<T...>(timeout)
-	local yield = coroutine.running()
+--[=[
+   Creates a new asynchronous Connection for the specified Event, 
+   thus yielding the runtime code until the event is triggered. 
+   An optional timeout argument defines how long the code will yield (in seconds) 
+   until the Wait method is terminated and therefore fails.
 
+    @param timeout number
+    @return ... any
+]=]
+function Event.Wait<T...>(self: Event<T...>, timeout: number?): ...any
+	local yield = coroutine.running()
+	
 	local function resumeCoroutine(...)
 		task.spawn(yield, ...)
 	end
@@ -68,13 +123,13 @@ function Event:Wait<T...>(timeout)
 	return coroutine.yield()
 end
 
-function Event:Destroy<T...>()
-	table.clear(self.Connections)
-	setmetatable(self, nil)
+--[=[
+   Destroys Event, therefore and clears all Connections
+
+    @return nil
+]=]
+function Event.Destroy<T...>(self: Event<T...>): nil
+	return table.clear(self.Connections)
 end
 
-return function<T...>(): Event<T...>
-	return setmetatable({
-		Connections = {}
-	}, Event) :: any
-end
+return Event.new
