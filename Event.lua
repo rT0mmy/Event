@@ -9,6 +9,14 @@
     https://github.com/rT0mmy/Event
 
     @class Event<T...>
+
+	@prop Connections {(T...) -> ()}
+	
+	@method :Connect (callback: (T...) -> ()) -> nil
+	@method :Once (callback: (T...) -> ()) -> nil
+	@method :Fire (T...) -> nil
+	@method :Wait (timeout: number) -> ...any
+	@method :Destroy () -> nil
 ]=]
 
 type Callback<T...> = (T...) -> ()
