@@ -95,10 +95,10 @@ print(success)
 > Disconnects the ```Connection``` from Event
 
 ```lua
-ConnectionObject()
+ConnectionObject:Disconnect()
 ```
 ```lua
-newConnection()
+newConnection:Disconnect()
 ```
 
 <br><br>
@@ -110,17 +110,6 @@ EventObject:Fire(T...) -> nil
 ```
 ```lua
 EventObject:Fire("Hello World!", "\n Luau is great!")
-```
-
-<br><br>
-
-> Terminates all ```Connection```s from the ```Event```
-> 
-```lua
-EventObject:DisconnectAll() -> nil
-```
-```lua
-EventObject:DisconnectAll()
 ```
 
 <br><br>
