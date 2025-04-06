@@ -18,11 +18,6 @@
 
 <br><br><br><br>
 
-> **Warning** <br>
-> Event is under development
-
-<br><br>
-
 ## Why Event?
 Event is an API meticulously crafted to simplify event management, making your code more readable, maintainable, and responsive;
 It's lightweight and straightforward structure makes it extremly easy to implement into your workflow.
