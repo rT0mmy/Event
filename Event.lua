@@ -1,6 +1,5 @@
---!strict
 --!native
---!optimize 2
+--!strict
 
 --[=[
     A simple API for blazing fast scriptevents
@@ -19,19 +18,24 @@
 	@method :Destroy () -> nil
 ]=]
 
+
 type Callback<T...> = (T...) -> ()
-export type Connection = ()->nil
+
+export type Connection<T...> = {
+	Disconnect: (self: Connection<T...>) -> nil,
+	Callback: Callback<T...>
+}
 
 export type Event<T...> = {
-	Connections: {[number]: Callback<T...>},
+	Connections: {Connection<T...>},
 	
-	Connect: (self: Event<T...>, callback: Callback<T...>) -> Connection,
-	Once: (self: Event<T...>, callback: Callback<T...>) -> Connection,
-
-	Fire: (self: Event<T...>, T...) -> (),
+	Connect: (self: Event<T...>, callback: Callback<T...>) -> Connection<T...>,
+	
+	Once: (self: Event<T...>, callback: Callback<T...>) -> Connection<T...>,
 	Wait: (self: Event<T...>, timeout: number?) -> ...any,
-
-	Destroy: (self: Event<T...>) -> (),
+	Fire: (self: Event<T...>, T...) -> ...any,
+	
+	Destroy: (self: Event<T...>) -> nil
 }
 
 local Event = {}
@@ -44,13 +48,13 @@ local Event = {}
 function Event.new<T...>(): Event<T...>
 	return {
 		Connections = {},
-
-		Destroy = Event.Destroy,
+		
 		Connect = Event.Connect,
-
+		Destroy = Event.Destroy,
+		
 		Once = Event.Once,
+		Wait = Event.Wait,
 		Fire = Event.Fire,
-		Wait = Event.Wait
 	}
 end
 
@@ -60,13 +64,21 @@ end
     @param callback (T...) -> nil
     @return Connection
 ]=]
-function Event.Connect<T...>(self: Event<T...>, callback: Callback<T...>): Connection
-	local n = #self.Connections+1
-	self.Connections[n] = callback
+function Event.Connect<T...>(self: Event<T...>, callback: Callback<T...>): Connection<T...>
+	local n = #self.Connections + 1
 	
-	return function()
-		self.Connections[n] = nil
-	end
+	local Connection: Connection<T...> = {
+		Disconnect = function()
+			table.remove(self.Connections, n)
+			return nil
+		end,
+		
+		Callback = callback
+	}
+	
+	table.insert(self.Connections, Connection)
+	
+	return Connection
 end
 
 --[=[
@@ -75,29 +87,18 @@ end
     @param callback (T...) -> nil
     @return Connection
 ]=]
-function Event.Once<T...>(self: Event<T...>, callback: Callback<T...>): Connection
-	local c
-	
-	c = self:Connect(function(...)
+function Event.Once<T...>(self: Event<T...>, callback: Callback<T...>): Connection<T...>
+	local Connection
+
+	Connection = self:Connect(function(...)
 		callback(...)
-		c()
+
+		if Connection then
+			Connection:Disconnect()
+		end
 	end)
 
-	return c
-end
-
---[=[
-    Fires the event, triggering all Connections (callbacks)
-
-    @param (...) T...
-    @return nil
-]=]
-function Event.Fire<T...>(self: Event<T...>, ...:T...): nil
-	for _, v in self.Connections do
-		v(...)
-	end
-	
-	return
+	return Connection
 end
 
 --[=[
@@ -111,19 +112,19 @@ end
 ]=]
 function Event.Wait<T...>(self: Event<T...>, timeout: number?): ...any
 	local yield = coroutine.running()
-	
+
 	local function resumeCoroutine(...)
 		task.spawn(yield, ...)
 	end
 
-	local connection = Event.Once(self, resumeCoroutine)
+	local Connection = self:Once(resumeCoroutine)
 
 	if timeout then
 		task.delay(timeout, function()
 			resumeCoroutine()
 
-			if connection then
-				connection()
+			if Connection then
+				Connection:Disconnect()
 			end
 		end)
 	end
@@ -132,12 +133,28 @@ function Event.Wait<T...>(self: Event<T...>, timeout: number?): ...any
 end
 
 --[=[
+    Fires the event, triggering all Connections (callbacks)
+
+    @param (...) T...
+    @return nil
+]=]
+function Event.Fire<T...>(self: Event<T...>, ...:T...): ...any
+	for _, connection in self.Connections do
+		connection.Callback(...)
+	end
+end
+
+--[=[
    Destroys Event, therefore clears all Connections
 
     @return nil
 ]=]
-function Event.Destroy<T...>(self: Event<T...>): nil
-	return table.clear(self.Connections)
+function Event.Destroy<T...>(self: Event<T...>)
+	for _, connection in self.Connections do
+		connection:Disconnect()
+	end
+	
+	return nil
 end
 
 return Event.new
